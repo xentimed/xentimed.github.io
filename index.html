@@ -1,10 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Portfolio</title>
+<meta charset="UTF-8">
+<title>runyoussef.me</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>runyoussef.me — coming soon</h1>
+
+  <div id="desktop">
+
+    <!-- Desktop icons -->
+    <div class="icon" data-window="about">
+      <div class="icon-img">📁</div>
+      <div class="icon-label">about_me</div>
+    </div>
+
+    <div class="icon" data-window="projects">
+      <div class="icon-img">📁</div>
+      <div class="icon-label">projects</div>
+    </div>
+
+    <div class="icon" data-window="academic">
+      <div class="icon-img">📁</div>
+      <div class="icon-label">academic_journey</div>
+    </div>
+
+    <div class="icon" data-window="experience">
+      <div class="icon-img">📁</div>
+      <div class="icon-label">experience</div>
+    </div>
+
+    <div class="icon" data-window="terminal">
+      <div class="icon-img">🖥️</div>
+      <div class="icon-label">terminal.exe</div>
+    </div>
+
+    <!-- Windows -->
+    <div class="window" id="window-about" data-title="about_me">
+      <div class="window-titlebar">
+        <span>about_me</span>
+        <span class="window-close">✕</span>
+      </div>
+      <div class="window-content">
+        <h2>whoami</h2>
+        <p>I'm Youssef Tamyachte — goes by Xen. Cybersecurity student and content creator.
+        I make Linux-focused content on my YouTube channel, xentimed, and I'm building this
+        site as a home base for my work.</p>
+      </div>
+    </div>
+
+    <div class="window" id="window-projects" data-title="projects">
+      <div class="window-titlebar">
+        <span>projects</span>
+        <span class="window-close">✕</span>
+      </div>
+      <div class="window-content">
+        <h2>ls ~/projects</h2>
+        <ul>
+          <li>Project 1 — description here</li>
+          <li>Project 2 — description here</li>
+          <li>Project 3 — description here</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="window" id="window-academic" data-title="academic_journey">
+      <div class="window-titlebar">
+        <span>academic_journey</span>
+        <span class="window-close">✕</span>
+      </div>
+      <div class="window-content">
+        <h2>cat academic_journey.txt</h2>
+        <p>Timeline of your studies, certifications, coursework, and cybersecurity focus areas.</p>
+      </div>
+    </div>
+
+    <div class="window" id="window-experience" data-title="experience">
+      <div class="window-titlebar">
+        <span>experience</span>
+        <span class="window-close">✕</span>
+      </div>
+      <div class="window-content">
+        <h2>cat experience.txt</h2>
+        <p>Work history, internships, CTF placements, or freelance work goes here.</p>
+      </div>
+    </div>
+
+    <div class="window" id="window-terminal" data-title="terminal.exe">
+      <div class="window-titlebar">
+        <span>terminal.exe</span>
+        <span class="window-close">✕</span>
+      </div>
+      <div class="window-content terminal-body">
+        <div id="terminal-output">Welcome to runyoussef.me
+Type 'help' to see available commands.
+</div>
+        <div class="terminal-input-line">
+          <span class="prompt">xen@runyoussef:~$</span>
+          <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div id="taskbar">
+      <div id="start-btn">☰ Start</div>
+      <div id="clock"></div>
+    </div>
+
+  </div>
+
+<script src="script.js"></script>
 </body>
 </html>
