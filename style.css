@@ -4,9 +4,7 @@
   font-weight: 400;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body, html {
   margin: 0;
@@ -17,150 +15,716 @@ body, html {
   overflow: hidden;
 }
 
-#desktop {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+::selection { background: #000080; color: #fff; }
+
+#desktop { position: relative; width: 100vw; height: 100vh; }
+
+/* ---- Desktop icons ---- */
+#icon-area {
+  position: absolute;
+  top: 0; left: 0;
+  width: calc(100% - 380px);
+  height: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 12px;
+  gap: 6px 12px;
 }
 
-/* Desktop icons */
-.icon {
-  position: absolute;
-  width: 80px;
+.desktop-icon {
+  width: 84px;
   text-align: center;
   cursor: pointer;
   color: #fff;
   user-select: none;
+  padding: 6px 2px;
+  border: 1px dotted transparent;
+  border-radius: 2px;
 }
-.icon:nth-child(1) { top: 30px; left: 30px; }
-.icon:nth-child(2) { top: 130px; left: 30px; }
-.icon:nth-child(3) { top: 230px; left: 30px; }
-.icon:nth-child(4) { top: 330px; left: 30px; }
-.icon:nth-child(5) { top: 430px; left: 30px; }
-
-.icon-img {
-  font-size: 36px;
+.desktop-icon:hover { background: rgba(0,0,0,0.15); }
+.desktop-icon.selected {
+  background: #000080;
+  border-color: #fff;
 }
-.icon-label {
+.desktop-icon .icon-img { font-size: 36px; line-height: 1; }
+.desktop-icon .icon-label {
   font-size: 11px;
   margin-top: 4px;
   text-shadow: 1px 1px 1px #000;
-  word-wrap: break-word;
-}
-.icon:hover .icon-label {
-  text-decoration: underline;
+  word-break: break-word;
+  line-height: 1.2;
 }
 
-/* Windows */
+/* ---- Windows ---- */
 .window {
   display: none;
   position: absolute;
-  top: 80px;
-  left: 150px;
-  width: 420px;
-  min-height: 260px;
+  top: 60px;
+  left: 120px;
+  width: 460px;
+  height: 320px;
+  min-height: 280px;
   background: #c0c0c0;
   border: 2px solid #000;
   box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
   z-index: 10;
+  resize: both;
+  overflow: hidden;
+  min-width: 300px;
+  min-height: 200px;
 }
 
-.window-titlebar {
+.window.maximized {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: calc(100vh - 32px) !important;
+  resize: none;
+  border-radius: 0;
+}
+
+.window.focused .window-titlebar {
   background: linear-gradient(to right, #000080, #1084d0);
+}
+.window-titlebar {
+  background: linear-gradient(to right, #5a5a5a, #828895);
   color: #fff;
-  padding: 4px 8px;
+  padding: 3px 4px 3px 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: move;
   font-size: 13px;
   font-weight: bold;
+  user-select: none;
 }
 
-.window-close {
-  cursor: pointer;
-  background: #c0c0c0;
-  color: #000;
-  padding: 0 6px;
+.window-controls { display: flex; gap: 2px; }
+.window-controls button {
+  width: 20px; height: 18px;
+  line-height: 1; padding: 0;
+  background: #c0c0c0; color: #000;
   border: 1px solid #000;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  font-size: 11px; font-family: inherit;
+  cursor: pointer; text-align: center;
+}
+.window-controls button:active {
+  border: 1px solid #000;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  background: #a0a0a0;
 }
 
 .window-content {
-  padding: 14px;
+  padding: 10px;
   background: #fff;
-  height: calc(100% - 26px);
+  height: calc(100% - 24px);
   overflow-y: auto;
   font-size: 13px;
   color: #111;
+  cursor: auto;
 }
 
-.window-content h2 {
-  font-size: 14px;
-  margin-top: 0;
-  border-bottom: 1px solid #999;
-  padding-bottom: 6px;
+/* ---- Explorer ---- */
+.explorer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: #d4d0c8;
+  border-bottom: 2px solid #808080;
+}
+.explorer-toolbar button {
+  background: #c0c0c0;
+  border: 1px solid #000;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  width: 28px; height: 24px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.explorer-toolbar button:active { border: 1px solid #000; background: #a0a0a0; }
+#addr-bar {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #808080;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  padding: 3px 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Terminal window */
-.terminal-body {
-  background: #000;
-  color: #0f0;
-  font-family: 'JetBrains Mono', monospace;
-  height: 260px;
+.explorer-body { padding: 4px; height: calc(100% - 54px); }
+
+.explorer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.explorer-row .row-icon { font-size: 16px; width: 20px; text-align: center; }
+.explorer-row .row-name { font-size: 12px; }
+.explorer-row.selected { background: #000080; color: #fff; }
+.explorer-row:hover:not(.selected) { background: #d4d0c8; }
+.explorer-action { color: #000080; font-weight: bold; }
+
+#window-browser { width: 640px; height: 480px; }
+
+/* ---- Desktop gadgets (retro Win95) ---- */
+#gadgets {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 360px;
+  height: calc(100% - 32px);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px;
   overflow-y: auto;
-  padding: 10px;
+  z-index: 15;
+  pointer-events: none;
+}
+.gadget {
+  pointer-events: auto;
+  background: #c0c0c0;
+  border-top: 2px solid #dfdfdf;
+  border-left: 2px solid #dfdfdf;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.35);
+  color: #000;
+  font-size: 12px;
+  overflow: hidden;
+}
+.gadget[data-gadget="puzzle"],
+.gadget[data-gadget="clock"] { width: calc(50% - 5px); }
+.gadget[data-gadget="calendar"],
+.gadget[data-gadget="notes"] { width: 100%; }
+.gadget-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 5px 3px 8px;
+  font-weight: bold;
+  font-size: 12px;
+  color: #fff;
+  background: linear-gradient(to right, #000080, #1084d0);
+  cursor: default;
+  user-select: none;
+}
+.gadget-close {
+  width: 18px; height: 18px;
+  line-height: 1;
+  padding: 0;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  background: #c0c0c0;
+  color: #000;
+  border: 1px solid #fff;
+  border-top-color: #fff;
+  border-left-color: #fff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.gadget:hover .gadget-close { opacity: 1; }
+.gadget-close:active {
+  border-color: #808080;
+  background: #a0a0a0;
+}
+.gadget-body {
+  padding: 8px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* analog clock — retro white face */
+#analog { display: block; }
+.a-face { fill: #f0f0f0; stroke: #000; stroke-width: 1.5; }
+#analog line { stroke-linecap: round; }
+#a-hour { stroke: #111; stroke-width: 4; }
+#a-minute { stroke: #111; stroke-width: 2.6; }
+#a-second { stroke: #c00; stroke-width: 1.3; }
+.a-pin { fill: #111; }
+.a-tick { stroke: #444; stroke-width: 1; }
+.a-tick-major { stroke: #000; stroke-width: 2; }
+#analog-digital {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  color: #000;
   font-size: 13px;
 }
 
-#terminal-output {
-  white-space: pre-wrap;
-}
-
-.terminal-input-line {
+/* calendar */
+#cal-head {
   display: flex;
-  gap: 6px;
-  margin-top: 4px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 4px;
+}
+#cal-label { font-weight: bold; font-size: 12px; color: #000080; }
+#cal-head button {
+  background: #c0c0c0;
+  color: #000;
+  border: 1px solid #fff;
+  border-top-color: #fff;
+  border-left-color: #fff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  width: 18px; height: 18px;
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  line-height: 1;
+}
+#cal-head button:active { border-color: #808080; background: #a0a0a0; }
+#cal-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  text-align: center;
+  font-size: 11px;
+  background: #808080;
+  border: 1px solid #808080;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+}
+.cal-cell { background: #fff; padding: 2px 0; color: #000; }
+.cal-dow { background: #d4d0c8; color: #000; font-weight: bold; }
+.cal-today {
+  background: #000080;
+  color: #fff;
+  font-weight: bold;
+}
+.cal-other { color: #a0a0a0; background: #fff; }
+
+/* notes */
+.notes-greeter {
+  align-self: stretch;
+  background: #ffffca;
+  color: #000;
+  border: 1px solid #808080;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  padding: 4px 6px;
+  font-size: 11px;
+  font-weight: bold;
+}
+#notes-area {
+  width: 100%;
+  height: 130px;
+  resize: vertical;
+  background: #fff;
+  border: 2px inset #d4d0c8;
+  color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 6px 8px;
+  outline: none;
+}
+#notes-area::placeholder { color: #9aa0a6; }
+
+/* sliding puzzle */
+#puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  width: 100%;
+  max-width: 150px;
+  background: #808080;
+  padding: 2px;
+  border: 1px solid #808080;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+}
+.p-tile {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(to right, #000080, #1c4fd0);
+  border-top: 2px solid #6aa0ff;
+  border-left: 2px solid #6aa0ff;
+  border-right: 2px solid #000040;
+  border-bottom: 2px solid #000040;
+  cursor: pointer;
+  user-select: none;
+}
+.p-tile:active { filter: brightness(1.25); }
+.p-blank { background: #c0c0c0; border: 1px solid #808080; cursor: default; }
+.puzzle-status {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #000;
+  font-variant-numeric: tabular-nums;
+}
+#puzzle-state { font-weight: bold; color: #000080; }
+#puzzle-shuffle {
+  background: #c0c0c0;
+  color: #000;
+  border: 1px solid #fff;
+  border-top-color: #fff;
+  border-left-color: #fff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  padding: 2px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+#puzzle-shuffle:active { border-color: #808080; background: #a0a0a0; }
+
+/* ---- Notepad ---- */
+.notepad-body { padding: 0; background: #fff; }
+#notepad-content {
+  margin: 0;
+  padding: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
-.prompt {
-  color: #0f0;
+/* ---- Browser ---- */
+.browser-chrome {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: #d4d0c8;
+  border-bottom: 2px solid #808080;
 }
+.browser-chrome button {
+  background: #c0c0c0;
+  border: 1px solid #000;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  min-width: 26px;
+  height: 24px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+}
+.browser-chrome button:active { border: 1px solid #000; background: #a0a0a0; }
+#browser-address {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #000;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  padding: 3px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #000;
+}
+#browser-body {
+  height: calc(100% - 54px);
+  overflow-y: auto;
+  background: #fff;
+}
+.browser-content { padding: 14px 18px; color: #222; font-size: 13px; }
+.repo-title { font-size: 18px; font-weight: bold; color: #000080; }
+.repo-desc { margin: 6px 0; color: #333; }
+.repo-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0; }
+.infok { color: #444; }
+.topic {
+  display: inline-block;
+  background: #eef;
+  color: #000080;
+  border: 1px solid #ccc;
+  padding: 1px 8px;
+  margin: 2px 4px 2px 0;
+  font-size: 11px;
+  border-radius: 8px;
+}
+.open-on-gh {
+  display: inline-block;
+  margin-top: 8px;
+  background: #000080;
+  color: #fff !important;
+  padding: 4px 10px;
+  text-decoration: none;
+  font-size: 12px;
+}
+.open-on-gh:hover { background: #1084d0; }
+.browser-content hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 12px 0;
+}
+.readme { line-height: 1.5; }
+.readme h1 { font-size: 16px; }
+.readme h2 { font-size: 15px; }
+.readme h3 { font-size: 14px; }
+.readme h1, .readme h2, .readme h3, .readme h4 { color: #000080; margin: 14px 0 6px; }
+.readme p { margin: 6px 0; }
+.readme ul, .readme ol { margin: 6px 0; padding-left: 22px; }
+.readme a { color: #000080; }
+.readme code {
+  background: #f0f0f0;
+  padding: 0 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.readme pre {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  padding: 8px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.readme pre code { background: transparent; padding: 0; }
+.muted { color: #999; }
+.browser-note {
+  padding: 30px 20px;
+  color: #333;
+  font-size: 13px;
+  text-align: center;
+}
+.browser-error { color: #a00; }
+
+
+/* ---- Terminal (kitty / Tokyo Night) ---- */
+.terminal-body {
+  background: #1a1b26;
+  color: #c0caf5;
+  font-family: 'JetBrains Mono', monospace;
+  height: calc(100% - 24px);
+  overflow-y: auto;
+  padding: 10px 12px;
+  font-size: 13px;
+  caret-color: #c0caf5;
+}
+#terminal-output { white-space: normal; }
+#terminal-output .t-line { white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
+.terminal-input-line { display: flex; gap: 0; margin-top: 4px; }
+.prompt {
+  color: #c0caf5;
+  white-space: nowrap;
+  user-select: none;
+}
+.prompt .c-user { color: #7aa2f7; }
+.prompt .c-host { color: #9ece6a; }
+.prompt .c-path { color: #7dcfff; }
+.prompt .c-dollar { color: #c0caf5; }
+/* output accents */
+.t-out { color: #c0caf5; }
+.t-err { color: #f7768e; }
+.t-warn { color: #e0af68; }
+.t-ok { color: #9ece6a; }
+.t-dim { color: #565f89; }
+.t-muted { color: #414868; }
+.t-dir { color: #7dcfff; }
+.t-cyan { color: #7dcfff; }
+
+/* kitty selection colors */
+.terminal-body ::selection { background: #33467c; color: #c0caf5; }
 
 #terminal-input {
   background: transparent;
-  border: none;
-  outline: none;
-  color: #0f0;
+  border: none; outline: none;
+  color: #c0caf5;
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   flex: 1;
 }
 
-/* Taskbar */
+/* ---- Taskbar ---- */
 #taskbar {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 32px;
+  bottom: 0; left: 0;
+  width: 100%; height: 32px;
   background: #c0c0c0;
   border-top: 2px solid #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px;
+  padding: 0 4px;
   font-size: 13px;
-  z-index: 20;
+  z-index: 30;
 }
-
 #start-btn {
   background: #c0c0c0;
   border: 1px solid #000;
-  padding: 2px 10px;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  padding: 3px 10px;
   cursor: pointer;
   font-weight: bold;
+  display: flex; align-items: center; gap: 4px;
+  font-family: inherit;
 }
-
+#start-btn:active, #start-btn.active {
+  border: 1px solid #000;
+  background: #a0a0a0;
+}
+#taskbar-windows {
+  display: flex; gap: 3px;
+  flex: 1;
+  overflow-x: auto;
+  padding: 0 6px;
+}
+.taskbar-window {
+  border: 1px solid #000;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  background: #c0c0c0; color: #000;
+  padding: 3px 10px;
+  font-size: 12px; font-family: inherit;
+  cursor: pointer;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.taskbar-window.active {
+  background: #000080; color: #fff;
+  border-top-color: #000;
+  border-left-color: #000;
+}
 #clock {
   color: #000;
+  border: 1px solid #000;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  background: #c0c0c0;
+  padding: 3px 8px;
+  min-width: 60px;
+  text-align: center;
+  cursor: pointer;
+}
+#clock:hover { background: #d4d0c8; }
+#clock.pressed { background: #a0a0a0; }
+
+/* Clock flyout (like Win clock tray) */
+#clock-popup {
+  position: absolute;
+  bottom: 36px;
+  right: 4px;
+  width: 240px;
+  background: #c0c0c0;
+  border: 2px solid #000;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  z-index: 45;
+  padding: 10px;
+}
+#clock-popup[hidden] { display: none; }
+#clock-popup-time {
+  font-size: 22px;
+  font-weight: bold;
+  color: #000080;
+  text-align: center;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+}
+#clock-popup-date {
+  font-size: 12px;
+  color: #000;
+  text-align: center;
+  margin-bottom: 8px;
+}
+#clock-popup-cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+#clock-cal-label {
+  font-weight: bold;
+  font-size: 12px;
+  color: #000080;
+}
+#clock-popup-cal-head button {
+  background: #c0c0c0;
+  color: #000;
+  border: 1px solid #fff;
+  border-top-color: #fff;
+  border-left-color: #fff;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  width: 18px; height: 18px;
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  line-height: 1;
+}
+#clock-popup-cal-head button:active { border-color: #808080; background: #a0a0a0; }
+#clock-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  text-align: center;
+  font-size: 11px;
+  background: #808080;
+  border: 1px solid #808080;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+}
+#clock-cal-grid .cal-cell { background: #fff; padding: 2px 0; color: #000; }
+#clock-cal-grid .cal-dow { background: #d4d0c8; font-weight: bold; }
+#clock-cal-grid .cal-today { background: #000080; color: #fff; font-weight: bold; }
+#clock-cal-grid .cal-other { color: #a0a0a0; }
+
+/* ---- Start menu ---- */
+#start-menu {
+  display: none;
+  position: absolute;
+  bottom: 34px; left: 4px;
+  width: 230px;
+  background: #c0c0c0;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  z-index: 40;
+}
+#start-menu.open { display: flex; }
+#start-sidebar {
+  width: 26px;
+  background: linear-gradient(to bottom, #000080, #1084d0);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 6px;
+}
+#start-sidebar span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: #fff; font-size: 15px; font-weight: bold; letter-spacing: 1px;
+}
+#start-items { flex: 1; padding: 4px; }
+.start-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer; font-size: 13px;
+}
+.start-item .s-icon { font-size: 15px; width: 18px; text-align: center; }
+.start-item:hover { background: #000080; color: #fff; }
+#start-items hr {
+  border: none;
+  border-top: 1px solid #808080;
+  border-bottom: 1px solid #fff;
+  margin: 4px 2px;
 }

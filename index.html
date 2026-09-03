@@ -10,95 +10,141 @@
 
   <div id="desktop">
 
-    <!-- Desktop icons -->
-    <div class="icon" data-window="about">
-      <div class="icon-img">📁</div>
-      <div class="icon-label">about_me</div>
-    </div>
+    <!-- Desktop icons (rendered from virtual FS in script.js) -->
+    <div id="icon-area"></div>
 
-    <div class="icon" data-window="projects">
-      <div class="icon-img">📁</div>
-      <div class="icon-label">projects</div>
-    </div>
-
-    <div class="icon" data-window="academic">
-      <div class="icon-img">📁</div>
-      <div class="icon-label">academic_journey</div>
-    </div>
-
-    <div class="icon" data-window="experience">
-      <div class="icon-img">📁</div>
-      <div class="icon-label">experience</div>
-    </div>
-
-    <div class="icon" data-window="terminal">
-      <div class="icon-img">🖥️</div>
-      <div class="icon-label">terminal.exe</div>
-    </div>
-
-    <!-- Windows -->
-    <div class="window" id="window-about" data-title="about_me">
+    <!-- File Explorer -->
+    <div class="window" id="window-explorer" data-title="File Explorer">
       <div class="window-titlebar">
-        <span>about_me</span>
-        <span class="window-close">✕</span>
+        <span>File Explorer</span>
+        <span class="window-controls">
+          <button class="btn-min" title="Minimize">─</button>
+          <button class="btn-max" title="Maximize">□</button>
+          <button class="btn-close" title="Close">✕</button>
+        </span>
       </div>
-      <div class="window-content">
-        <h2>whoami</h2>
-        <p>I'm Youssef Tamyachte — goes by Xen. Cybersecurity student and content creator.
-        I make Linux-focused content on my YouTube channel, xentimed, and I'm building this
-        site as a home base for my work.</p>
+      <div class="explorer-toolbar">
+        <button id="btn-back" title="Back">←</button>
+        <button id="btn-up" title="Up one level">↑</button>
+        <div id="addr-bar">C:\</div>
+      </div>
+      <div class="window-content explorer-body">
+        <div id="explorer-list"></div>
       </div>
     </div>
 
-    <div class="window" id="window-projects" data-title="projects">
+    <!-- Notepad reader -->
+    <div class="window" id="window-notepad" data-title="Notepad">
       <div class="window-titlebar">
-        <span>projects</span>
-        <span class="window-close">✕</span>
+        <span id="notepad-title">Untitled.txt</span>
+        <span class="window-controls">
+          <button class="btn-min" title="Minimize">─</button>
+          <button class="btn-max" title="Maximize">□</button>
+          <button class="btn-close" title="Close">✕</button>
+        </span>
       </div>
-      <div class="window-content">
-        <h2>ls ~/projects</h2>
-        <ul>
-          <li>Project 1 — description here</li>
-          <li>Project 2 — description here</li>
-          <li>Project 3 — description here</li>
-        </ul>
+      <div class="window-content notepad-body">
+        <pre id="notepad-content"></pre>
       </div>
     </div>
 
-    <div class="window" id="window-academic" data-title="academic_journey">
+    <!-- Web browser mirror -->
+    <div class="window" id="window-browser" data-title="Browser">
       <div class="window-titlebar">
-        <span>academic_journey</span>
-        <span class="window-close">✕</span>
+        <span>Browser</span>
+        <span class="window-controls">
+          <button class="btn-min" title="Minimize">─</button>
+          <button class="btn-max" title="Maximize">□</button>
+          <button class="btn-close" title="Close">✕</button>
+        </span>
       </div>
-      <div class="window-content">
-        <h2>cat academic_journey.txt</h2>
-        <p>Timeline of your studies, certifications, coursework, and cybersecurity focus areas.</p>
+      <div class="browser-chrome">
+        <button id="browser-back" title="Back">←</button>
+        <button id="browser-forward" title="Forward">→</button>
+        <button id="browser-refresh" title="Refresh">⟳</button>
+        <input type="text" id="browser-address" spellcheck="false" autocomplete="off">
+        <button id="browser-go" title="Open">Go</button>
       </div>
+      <div id="browser-body"></div>
     </div>
 
-    <div class="window" id="window-experience" data-title="experience">
-      <div class="window-titlebar">
-        <span>experience</span>
-        <span class="window-close">✕</span>
-      </div>
-      <div class="window-content">
-        <h2>cat experience.txt</h2>
-        <p>Work history, internships, CTF placements, or freelance work goes here.</p>
-      </div>
-    </div>
-
+    <!-- Terminal -->
     <div class="window" id="window-terminal" data-title="terminal.exe">
       <div class="window-titlebar">
         <span>terminal.exe</span>
-        <span class="window-close">✕</span>
+        <span class="window-controls">
+          <button class="btn-min" title="Minimize">─</button>
+          <button class="btn-max" title="Maximize">□</button>
+          <button class="btn-close" title="Close">✕</button>
+        </span>
       </div>
       <div class="window-content terminal-body">
-        <div id="terminal-output">Welcome to runyoussef.me
-Type 'help' to see available commands.
-</div>
+        <div id="terminal-output"></div>
         <div class="terminal-input-line">
-          <span class="prompt">xen@runyoussef:~$</span>
+          <span class="prompt"><span class="c-user">xen</span><span class="c-host">@runyoussef</span><span class="c-path">:~</span><span class="c-dollar">$</span>&nbsp;</span>
           <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+
+    <!-- Windows 7 style gadgets -->
+    <div id="gadgets">
+      <div class="gadget" data-gadget="puzzle">
+        <div class="gadget-title">
+          <span>Puzzle</span>
+          <button class="gadget-close" title="Close gadget">✕</button>
+        </div>
+        <div class="gadget-body">
+          <div id="puzzle-grid"></div>
+          <div class="puzzle-status">
+            <span id="puzzle-moves">moves: 0</span>
+            <span id="puzzle-state"></span>
+          </div>
+          <button id="puzzle-shuffle">Shuffle</button>
+        </div>
+      </div>
+
+      <div class="gadget" data-gadget="clock">
+        <div class="gadget-title">
+          <span>Clock</span>
+          <button class="gadget-close" title="Close gadget">✕</button>
+        </div>
+        <div class="gadget-body">
+          <svg id="analog" viewBox="0 0 100 100" width="130" height="130">
+            <circle cx="50" cy="50" r="46" class="a-face"/>
+            <g id="a-ticks"></g>
+            <line id="a-hour"  x1="50" y1="50" x2="50" y2="28"/>
+            <line id="a-minute" x1="50" y1="50" x2="50" y2="18"/>
+            <line id="a-second" x1="50" y1="54" x2="50" y2="14"/>
+            <circle cx="50" cy="50" r="2" class="a-pin"/>
+          </svg>
+          <div id="analog-digital"></div>
+        </div>
+      </div>
+
+      <div class="gadget" data-gadget="calendar">
+        <div class="gadget-title">
+          <span>Calendar</span>
+          <button class="gadget-close" title="Close gadget">✕</button>
+        </div>
+        <div class="gadget-body">
+          <div id="cal-head">
+            <button id="cal-prev" title="Previous month">◀</button>
+            <span id="cal-label"></span>
+            <button id="cal-next" title="Next month">▶</button>
+          </div>
+          <div id="cal-grid"></div>
+        </div>
+      </div>
+
+      <div class="gadget" data-gadget="notes">
+        <div class="gadget-title">
+          <span>Notes</span>
+          <button class="gadget-close" title="Close gadget">✕</button>
+        </div>
+        <div class="gadget-body">
+          <div class="notes-greeter">✉ Welcome to my portfolio!</div>
+          <textarea id="notes-area" placeholder="jot something down…"></textarea>
         </div>
       </div>
     </div>
@@ -106,7 +152,26 @@ Type 'help' to see available commands.
     <!-- Taskbar -->
     <div id="taskbar">
       <div id="start-btn">☰ Start</div>
+      <div id="taskbar-windows"></div>
       <div id="clock"></div>
+    </div>
+
+    <!-- Clock flyout -->
+    <div id="clock-popup" hidden>
+      <div id="clock-popup-time"></div>
+      <div id="clock-popup-date"></div>
+      <div id="clock-popup-cal-head">
+        <button id="clock-cal-prev" title="Previous month">◀</button>
+        <span id="clock-cal-label"></span>
+        <button id="clock-cal-next" title="Next month">▶</button>
+      </div>
+      <div id="clock-cal-grid"></div>
+    </div>
+
+    <!-- Start menu -->
+    <div id="start-menu">
+      <div id="start-sidebar"><span>xen</span></div>
+      <div id="start-items"></div>
     </div>
 
   </div>
