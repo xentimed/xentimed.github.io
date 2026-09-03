@@ -69,9 +69,9 @@
     </div>
 
     <!-- Terminal -->
-    <div class="window" id="window-terminal" data-title="terminal.exe">
+    <div class="window" id="window-terminal" data-title="console">
       <div class="window-titlebar">
-        <span>terminal.exe</span>
+        <span>console</span>
         <span class="window-controls">
           <button class="btn-min" title="Minimize">─</button>
           <button class="btn-max" title="Maximize">□</button>
@@ -81,7 +81,7 @@
       <div class="window-content terminal-body">
         <div id="terminal-output"></div>
         <div class="terminal-input-line">
-          <span class="prompt"><span class="c-user">xen</span><span class="c-host">@runyoussef</span><span class="c-path">:~</span><span class="c-dollar">$</span>&nbsp;</span>
+          <span class="prompt"><span class="c-user">user</span><span class="c-host">@run</span><span class="c-path">:~</span><span class="c-dollar">$</span>&nbsp;</span>
           <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
         </div>
       </div>
@@ -122,21 +122,6 @@
         </div>
       </div>
 
-      <div class="gadget" data-gadget="calendar">
-        <div class="gadget-title">
-          <span>Calendar</span>
-          <button class="gadget-close" title="Close gadget">✕</button>
-        </div>
-        <div class="gadget-body">
-          <div id="cal-head">
-            <button id="cal-prev" title="Previous month">◀</button>
-            <span id="cal-label"></span>
-            <button id="cal-next" title="Next month">▶</button>
-          </div>
-          <div id="cal-grid"></div>
-        </div>
-      </div>
-
       <div class="gadget" data-gadget="notes">
         <div class="gadget-title">
           <span>Notes</span>
@@ -151,10 +136,13 @@
 
     <!-- Taskbar -->
     <div id="taskbar">
-      <div id="start-btn">☰ Start</div>
+      <div id="start-btn"><span class="start-flag" aria-hidden="true"></span>Start</div>
       <div id="taskbar-windows"></div>
       <div id="clock"></div>
     </div>
+
+    <!-- Right-click context menu -->
+    <div id="ctx-menu" hidden></div>
 
     <!-- Clock flyout -->
     <div id="clock-popup" hidden>
@@ -170,8 +158,29 @@
 
     <!-- Start menu -->
     <div id="start-menu">
-      <div id="start-sidebar"><span>xen</span></div>
+      <div id="start-sidebar"><span>youssef</span></div>
       <div id="start-items"></div>
+    </div>
+
+    <!-- Display Properties (right-click desktop → Properties) -->
+    <div class="window" id="window-display" data-title="Display Properties">
+      <div class="window-titlebar">
+        <span>Display Properties</span>
+        <span class="window-controls">
+          <button class="btn-close" title="Close">✕</button>
+        </span>
+      </div>
+      <div class="window-content">
+        <div class="props-tab">Desktop</div>
+        <div class="props-group">
+          <label class="props-label">Wallpaper</label>
+          <div class="wall-grid" id="wall-grid"></div>
+        </div>
+        <div class="props-actions">
+          <button class="btn-retro" id="props-ok">OK</button>
+          <button class="btn-retro" id="props-cancel">Cancel</button>
+        </div>
+      </div>
     </div>
 
   </div>

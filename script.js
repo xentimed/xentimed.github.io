@@ -11,11 +11,10 @@ const FS_ROOT = dir('/', [
 
   file('about_me.txt', `whoami
 
-I'm Youssef Tamyachte — goes by Xen. Cybersecurity student and content creator.
+I'm Youssef Tamyachte. Cybersecurity student.
 
-I make Linux-focused content on my YouTube channel, xentimed, and I'm building
-this site as a home base for my work: capturing what I learn, the projects I
-build, and the rabbit holes I go down along the way.`),
+I'm building this site as a home base for my work: capturing what I learn, the
+projects I build, and the rabbit holes I go down along the way.`),
 
   file('academic_journey.txt', `academic_journey
 
@@ -64,19 +63,10 @@ A summary of issues I've fixed and features I've contributed to open-source
 Linux and security tooling.
 
 Will include the repos, PRs, and what each contribution taught me.`)
-    ]),
-    dir('content-creation', [
-      file('readme.txt', `Experience: content creation
-
-Running the xentimed YouTube channel — scripting, recording, and editing
-Linux-focused educational videos.
-
-Beyond the videos themselves, it's taught me to break complex topics down into
-something a beginner can actually follow.`)
     ])
   ]),
 
-  app('terminal.exe', 'terminal')
+  app('console', 'terminal')
 ]);
 
 /* ---- helpers ---- */
@@ -119,6 +109,8 @@ function repoForPath(pathArr) {
    Window manager
    ============================================================ */
 const windows = document.querySelectorAll('.window');
+// All windows start closed (hidden) — opening adds them to the taskbar
+windows.forEach(w => w.classList.add('closed'));
 const taskbarWindows = document.getElementById('taskbar-windows');
 const startBtn = document.getElementById('start-btn');
 const startMenu = document.getElementById('start-menu');
@@ -172,6 +164,11 @@ function closeWindow(win) {
   const vis = [...windows].filter(w => !w.classList.contains('closed') && w !== win);
   if (vis.length) focusWindow(vis[vis.length - 1]);
   updateTaskbarButtons();
+  // closing the console ends the session — next open starts fresh with the fetch banner
+  if (win.id === 'window-terminal') {
+    const out = document.getElementById('terminal-output');
+    if (out) out.innerHTML = '';
+  }
 }
 function toggleMaximize(win) {
   if (win.classList.contains('maximized')) {
@@ -194,13 +191,16 @@ function toggleMaximize(win) {
 
 windows.forEach(win => {
   win.addEventListener('mousedown', () => focusWindow(win));
-  win.querySelector('.btn-close').addEventListener('click', e => {
+  const btnClose = win.querySelector('.btn-close');
+  const btnMin = win.querySelector('.btn-min');
+  const btnMax = win.querySelector('.btn-max');
+  if (btnClose) btnClose.addEventListener('click', e => {
     e.stopPropagation(); closeWindow(win);
   });
-  win.querySelector('.btn-min').addEventListener('click', e => {
+  if (btnMin) btnMin.addEventListener('click', e => {
     e.stopPropagation(); minimizeWindow(win);
   });
-  win.querySelector('.btn-max').addEventListener('click', e => {
+  if (btnMax) btnMax.addEventListener('click', e => {
     e.stopPropagation(); toggleMaximize(win);
   });
 
@@ -526,23 +526,31 @@ function inline(s) {
    Desktop icons (rendered from FS root)
    ============================================================ */
 const iconArea = document.getElementById('icon-area');
-FS_ROOT.children.forEach(node => {
-  const icon = document.createElement('div');
-  icon.className = 'desktop-icon';
-  icon.dataset.name = node.name;
-  icon.innerHTML = `<div class="icon-img">${ICONS[node.type]}</div><div class="icon-label">${node.name}</div>`;
-  icon.title = node.name;
 
-  icon.addEventListener('click', () => {
-    document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
-    icon.classList.add('selected');
+function renderDesktopIcons() {
+  iconArea.innerHTML = '';
+  FS_ROOT.children.forEach(node => {
+    const icon = document.createElement('div');
+    icon.className = 'desktop-icon';
+    icon.dataset.name = node.name;
+    icon.dataset.type = node.type;
+    icon.innerHTML = `<div class="icon-img">${ICONS[node.type]}</div><div class="icon-label">${node.name}</div>`;
+    icon.title = node.name;
+
+    icon.addEventListener('click', () => {
+      document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+      icon.classList.add('selected');
+    });
+    icon.addEventListener('contextmenu', e => e.preventDefault());
+    icon.addEventListener('dblclick', () => openEntry([node.name]));
+    iconArea.appendChild(icon);
   });
-  icon.addEventListener('dblclick', () => openEntry([node.name]));
-  iconArea.appendChild(icon);
-});
+}
+renderDesktopIcons();
 
 // close selection when clicking empty desktop
 document.getElementById('desktop').addEventListener('click', e => {
+  if (window.__marqueeJustUsed) { window.__marqueeJustUsed = false; return; }
   if (e.target.id === 'desktop' || e.target.id === 'icon-area') {
     document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
   }
@@ -591,13 +599,17 @@ document.addEventListener('click', e => {
 /* ============================================================
    Terminal
    ============================================================ */
-function openApp(name) { showWindow(document.getElementById('window-' + name)); }
+function openApp(name) {
+  const win = document.getElementById('window-' + name);
+  if (win) showWindow(win);
+  if (name === 'terminal') maybeBanner();
+}
 
 const terminalInput = document.getElementById('terminal-input');
 const terminalOutput = document.getElementById('terminal-output');
 
-const PT_USER = '<span class="c-user">xen</span>';
-const PT_HOST = '<span class="c-host">@runyoussef</span>';
+const PT_USER = '<span class="c-user">user</span>';
+const PT_HOST = '<span class="c-host">@run</span>';
 const PT_PATH = '<span class="c-path">:~</span>';
 const PT_DOLLAR = '<span class="c-dollar">$</span>';
 const PROMPT = `<span class="prompt">${PT_USER}${PT_HOST}${PT_PATH}${PT_DOLLAR}</span> `;
@@ -643,19 +655,84 @@ const HELP = [
   '<span class="t-dir">  projects</span>          browse the projects folder',
   '<span class="t-dir">  experience</span>        browse the experience folder',
   '<span class="t-dir">  date</span>              print the current date and time',
+  '<span class="t-dir">  fastfetch</span>         show the system info banner',
   '<span class="t-dir">  clear</span>             clear the screen'
 ].join('<br>');
 
+/* fastfetch-style banner (mirrors ~/.config/fastfetch/config.jsonc) */
+const FF_LOGO = [
+  "          .",
+  "         / \\",
+  "        /   \\",
+  "       /\\    \\",
+  "      /       \\",
+  "     /         \\",
+  "    /    .-.    \\",
+  "   /    |   |   _\\",
+  "  /   _.'   '._   \\",
+  " /_.-'         '-._\\"
+].join('\n');
+
+// Tokyo Night palette — colors 0..15 from the kitty.conf / fastfetch colors block
+const FF_PALETTE = [
+  '#15161e', '#f7768e', '#9ece6a', '#e0af68', '#7aa2f7', '#bb9af7', '#7dcfff', '#a9b1d6',
+  '#414868', '#f7768e', '#9ece6a', '#e0af68', '#7aa2f7', '#bb9af7', '#7dcfff', '#c0caf5'
+];
+const FF_START = Date.now();
+
+function fmtUptime() {
+  const s = Math.floor((Date.now() - FF_START) / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return (h ? h + 'h ' : '') + (h || m ? m + 'm ' : '') + sec + 's';
+}
+function fsEntries(node = FS_ROOT) {
+  return node.children.reduce((n, c) => n + 1 + (c.type === 'dir' ? fsEntries(c) : 0), 0);
+}
+
+function maybeBanner() {
+  if (!terminalOutput.childElementCount) banner();
+}
+
 function banner() {
-  push('<span class="t-cyan">Welcome to runyoussef.me</span>');
-  push('<span class="t-muted">Type \'help\' to see available commands.</span>');
+  const wrap = document.createElement('div');
+  wrap.className = 'ffetch';
+
+  const logo = document.createElement('pre');
+  logo.className = 'ff-logo';
+  logo.textContent = FF_LOGO;
+  wrap.appendChild(logo);
+
+  const info = document.createElement('div');
+  info.className = 'ff-info';
+  const row = (k, v) => `<div class="ff-row"><span class="ff-key">${k}</span>${v}</div>`;
+  const chips = (i) => FF_PALETTE.slice(i, i + 8)
+    .map(c => `<span class="ff-chip" style="background:${c}"></span>`).join('');
+  info.innerHTML =
+    '<div class="ff-title">user@run</div>' +
+    row('os', 'static web') +
+    row('kernel', 'html &middot; css &middot; js') +
+    row('packages', `${fsEntries()} files`) +
+    row('shell', 'xsh') +
+    row('terminal', 'kitty') +
+    row('wm', 'win7 desktop') +
+    row('uptime', fmtUptime()) +
+    row('media', 'none') +
+    `<div class="ff-colors"><div class="ff-crow">${chips(0)}</div><div class="ff-crow">${chips(8)}</div></div>`;
+  wrap.appendChild(info);
+
+  terminalOutput.appendChild(wrap);
+  text('t-muted', "Type 'help' to see available commands.");
 }
 
 const COMMANDS = {
   help: () => { push(HELP); return null; },
-  whoami: () => text(null, 'xen — cybersecurity student & content creator'),
+  whoami: () => text(null, 'Youssef Tamyachte — cybersecurity student'),
   ls: () => { push(lsNames()); return null; },
   date: () => text(null, new Date().toString()),
+  fastfetch: () => { banner(); return null; },
+  neofetch: () => { banner(); return null; },
   projects: () => { openFolderRoot('projects'); text(null, 'Opening projects…'); return null; },
   experience: () => { openFolderRoot('experience'); text(null, 'Opening experience…'); return null; }
 };
@@ -819,44 +896,6 @@ function tickAnalogClock() {
 setInterval(tickAnalogClock, 1000);
 tickAnalogClock();
 
-// calendar
-const calView = (() => { const n = new Date(); return { y: n.getFullYear(), m: n.getMonth() }; })();
-const calLabel = document.getElementById('cal-label');
-const calGrid = document.getElementById('cal-grid');
-
-function renderCalendar() {
-  const { y, m } = calView;
-  const names = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const first = new Date(y, m, 1);
-  const today = new Date();
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const startDow = first.getDay();
-  const prevDays = new Date(y, m, 0).getDate();
-
-  let html = names.map((n, i) => `<div class="cal-cell cal-dow">${n[0]}</div>`).join('');
-
-  for (let i = startDow - 1; i >= 0; i--) {
-    html += `<div class="cal-cell cal-other">${prevDays - i}</div>`;
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = d === today.getDate() && m === today.getMonth() && y === today.getFullYear();
-    html += `<div class="cal-cell${isToday ? ' cal-today' : ''}">${d}</div>`;
-  }
-  let cells = startDow + daysInMonth;
-  for (let i = cells, next = 1; i % 7 !== 0; i++, next++) {
-    html += `<div class="cal-cell cal-other">${next}</div>`;
-  }
-  calLabel.textContent = `${first.toLocaleString('en', { month: 'long' })} ${y}`;
-  calGrid.innerHTML = html;
-}
-document.getElementById('cal-prev').addEventListener('click', () => {
-  calView.m--; if (calView.m < 0) { calView.m = 11; calView.y--; } renderCalendar();
-});
-document.getElementById('cal-next').addEventListener('click', () => {
-  calView.m++; if (calView.m > 11) { calView.m = 0; calView.y++; } renderCalendar();
-});
-renderCalendar();
-
 // notes (persisted)
 const notesArea = document.getElementById('notes-area');
 const NOTES_KEY = 'xen_notes';
@@ -940,4 +979,247 @@ document.querySelectorAll('.gadget-close').forEach(btn => {
 
   // random starting position so it isn't solved on load
   shuffle();
+})();
+
+/* ============================================================
+   Shell polish: titlebar icons, system menus, wallpaper
+   ============================================================ */
+(function shellPolish() {
+  const desktop = document.getElementById('desktop');
+  const iconArea = document.getElementById('icon-area');
+  const displayWin = document.getElementById('window-display');
+  const ctxMenu = document.getElementById('ctx-menu');
+  const winGlyphs = { explorer: '📁', notepad: '📄', browser: '🌐', console: '🖥️', display: '🎨' };
+
+  /* ---------- context menu engine ---------- */
+  function closeCtx() {
+    ctxMenu.hidden = true;
+    ctxMenu.innerHTML = '';
+  }
+  function openCtx(x, y, items) {
+    ctxMenu.innerHTML = '';
+    items.forEach(it => {
+      if (it.sep) {
+        const d = document.createElement('div');
+        d.className = 'ctx-sep';
+        ctxMenu.appendChild(d);
+      } else {
+        const b = document.createElement('button');
+        b.className = 'ctx-item' + (it.head ? ' ctx-head' : '') + (it.disabled ? ' ctx-disabled' : '');
+        b.textContent = it.label;
+        b.disabled = !!it.disabled;
+        if (!it.disabled) {
+          b.addEventListener('click', () => { closeCtx(); it.action && it.action(); });
+        }
+        ctxMenu.appendChild(b);
+      }
+    });
+    ctxMenu.hidden = false;
+    // keep on-screen
+    const r = ctxMenu.getBoundingClientRect();
+    ctxMenu.style.left = Math.max(2, Math.min(x, window.innerWidth - r.width - 4)) + 'px';
+    ctxMenu.style.top  = Math.max(2, Math.min(y, window.innerHeight - r.height - 4)) + 'px';
+  }
+  document.addEventListener('mousedown', e => {
+    if (!ctxMenu.hidden && !ctxMenu.contains(e.target)) closeCtx();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCtx(); });
+  window.addEventListener('blur', closeCtx);
+  document.addEventListener('scroll', closeCtx, true);
+
+  /* ---------- titlebar icons + system menus ---------- */
+  function systemMenuFor(win, x, y) {
+    const maxed = win.classList.contains('maximized');
+    openCtx(x, y, [
+      { head: true, label: win.dataset.title || win.id },
+      { sep: true },
+      { label: maxed ? 'Restore' : 'Maximize', action: () => toggleMaximize(win) },
+      { label: 'Minimize', action: () => minimizeWindow(win) },
+      { sep: true },
+      { label: 'Close', action: () => closeWindow(win) }
+    ]);
+  }
+
+  windows.forEach(win => {
+    const tb = win.querySelector('.window-titlebar');
+    if (!tb) return;
+    // icon button on the left of the title
+    const key = win.id.replace('window-', '');
+    const ico = document.createElement('span');
+    ico.className = 'win-ico';
+    ico.textContent = winGlyphs[key] || '🗀';
+    ico.title = 'System menu';
+    tb.insertBefore(ico, tb.firstChild);
+    ico.addEventListener('mousedown', e => e.stopPropagation()); // don't start a titlebar drag
+    ico.addEventListener('click', e => {
+      e.stopPropagation();
+      const r = ico.getBoundingClientRect();
+      systemMenuFor(win, r.left, r.bottom + 2);
+    });
+    ico.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      systemMenuFor(win, e.clientX, e.clientY);
+    });
+    // right-click titlebar -> system menu
+    tb.addEventListener('contextmenu', e => {
+      if (e.target.closest('.window-controls') || e.target.closest('.win-ico')) return;
+      e.preventDefault();
+      systemMenuFor(win, e.clientX, e.clientY);
+    });
+    // double-click titlebar -> maximize/restore (like real Windows)
+    tb.addEventListener('dblclick', e => {
+      if (e.target.closest('.window-controls') || e.target.closest('.win-ico')) return;
+      toggleMaximize(win);
+    });
+  });
+
+  /* ---------- desktop + icon right-click menus ---------- */
+  document.getElementById('desktop').addEventListener('contextmenu', e => {
+    const icon = e.target.closest('.desktop-icon');
+    if (icon) {
+      e.preventDefault();
+      // select the icon under the cursor
+      document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+      icon.classList.add('selected');
+      const name = icon.dataset.name;
+      openCtx(e.clientX, e.clientY, [
+        { head: true, label: name },
+        { sep: true },
+        { label: 'Open', action: () => openEntry([name]) },
+        { label: 'Cut', disabled: true },
+        { label: 'Copy', disabled: true },
+        { label: 'Delete', disabled: true }
+      ]);
+      return;
+    }
+    if (e.target.id === 'desktop' || e.target.id === 'icon-area') {
+      e.preventDefault();
+      openCtx(e.clientX, e.clientY, [
+        { label: 'Arrange Icons', action: arrangeIcons },
+        { label: 'Refresh', action: () => { renderDesktopIcons(); } },
+        { sep: true },
+        { label: 'Display Properties…', action: () => showWindow(displayWin) },
+        { sep: true },
+        { label: 'New folder', disabled: true },
+        { label: 'Paste', disabled: true }
+      ]);
+    }
+  });
+
+  function arrangeIcons() {
+    const icons = [...iconArea.children];
+    icons.sort((a, b) => {
+      const ad = (a.dataset.type === 'dir' ? 0 : 1);
+      const bd = (b.dataset.type === 'dir' ? 0 : 1);
+      return ad - bd || a.dataset.name.localeCompare(b.dataset.name);
+    });
+    icons.forEach(i => i.remove());
+    icons.forEach(i => iconArea.appendChild(i));
+  }
+
+  /* ---------- wallpaper presets + Display Properties ---------- */
+  const WALLPAPERS = [
+    { id: 'teal',  name: 'Classic Teal', css: '#008080' },
+    { id: 'sea',   name: 'Deep Sea',     css: 'radial-gradient(1200px 800px at 70% 20%, #0a9a9a 0%, #005a5a 60%, #003f3f 100%)' },
+    { id: 'dusk',  name: 'Dusk',         css: 'linear-gradient(160deg, #1b2a6b 0%, #2b1b6b 55%, #0d0a1f 100%)' },
+    { id: 'midnight', name: 'Midnight',  css: 'radial-gradient(900px 600px at 30% 30%, #1c2340 0%, #0b0e1c 75%)' },
+    { id: 'tokyo', name: 'Tokyo Night',  css: 'linear-gradient(180deg, #1a1b26 0%, #10111a 60%, #0a0b12 100%)' },
+    { id: 'grid',  name: 'Teal Grid',    css: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 28px), repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 28px), #007070' },
+    { id: 'dots',  name: 'Polka',        css: 'radial-gradient(rgba(255,255,255,0.10) 1.5px, transparent 2.5px) 0 0 / 22px 22px, #006666' },
+    { id: 'graphite', name: 'Graphite',  css: 'linear-gradient(180deg, #3a3f4b 0%, #23262e 100%)' }
+  ];
+  const WALL_KEY = 'runy_wallpaper';
+  let wallId = localStorage.getItem(WALL_KEY) || 'teal';
+  function applyWall() {
+    const w = WALLPAPERS.find(x => x.id === wallId) || WALLPAPERS[0];
+    desktop.style.background = w.css;
+  }
+  function buildWallGrid() {
+    const grid = document.getElementById('wall-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    WALLPAPERS.forEach(w => {
+      const s = document.createElement('div');
+      s.className = 'wall-swatch' + (w.id === wallId ? ' selected' : '');
+      s.innerHTML = `<div class="wall-preview" style="background:${w.css}"></div><span class="wall-name">${w.name}</span>`;
+      s.addEventListener('click', () => {
+        wallId = w.id;
+        grid.querySelectorAll('.wall-swatch').forEach(x => x.classList.remove('selected'));
+        s.classList.add('selected');
+        applyWall();
+      });
+      grid.appendChild(s);
+    });
+  }
+  applyWall();
+  buildWallGrid();
+  const propsOk = document.getElementById('props-ok');
+  const propsCancel = document.getElementById('props-cancel');
+  if (propsOk) propsOk.addEventListener('click', () => {
+    localStorage.setItem(WALL_KEY, wallId);
+    closeWindow(displayWin);
+  });
+  if (propsCancel) propsCancel.addEventListener('click', () => {
+    wallId = localStorage.getItem(WALL_KEY) || 'teal';
+    applyWall();
+    buildWallGrid();
+    closeWindow(displayWin);
+  });
+  // closing the window with X = cancel (revert to saved wallpaper)
+  const displayClose = displayWin.querySelector('.btn-close');
+  if (displayClose) displayClose.addEventListener('click', () => {
+    wallId = localStorage.getItem(WALL_KEY) || 'teal';
+    applyWall();
+    buildWallGrid();
+  });
+
+  /* ---------- marquee selection on the desktop ---------- */
+  let mq = null;
+  const mqEl = document.createElement('div');
+  mqEl.id = 'marquee';
+  desktop.appendChild(mqEl);
+
+  function startMarquee(e) {
+    if (e.button !== 0) return;
+    if (!(e.target.id === 'desktop' || e.target.id === 'icon-area')) return;
+    // only when clicking empty desktop space
+    mq = { x: e.clientX, y: e.clientY, active: false };
+    document.body.style.userSelect = 'none';
+  }
+  function moveMarquee(e) {
+    if (!mq) return;
+    const dx = e.clientX - mq.x, dy = e.clientY - mq.y;
+    if (!mq.active && Math.hypot(dx, dy) > 5) mq.active = true;
+    if (mq.active) {
+      const dr = desktop.getBoundingClientRect();
+      const x = Math.min(mq.x, e.clientX) - dr.left;
+      const y = Math.min(mq.y, e.clientY) - dr.top;
+      const w = Math.abs(dx), h = Math.abs(dy);
+      mqEl.style.cssText = `display:block;left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+    }
+  }
+  function endMarquee(e) {
+    if (!mq) return;
+    document.body.style.userSelect = '';
+    if (mq.active) {
+      const dr = desktop.getBoundingClientRect();
+      const x = Math.min(mq.x, e.clientX) - dr.left;
+      const y = Math.min(mq.y, e.clientY) - dr.top;
+      const w = Math.abs(e.clientX - mq.x), h = Math.abs(e.clientY - mq.y);
+      document.querySelectorAll('.desktop-icon').forEach(ic => {
+        const r = ic.getBoundingClientRect();
+        const icl = r.left - dr.left, ict = r.top - dr.top;
+        const hit = !(icl + r.width < x || icl > x + w || ict + r.height < y || ict > y + h);
+        ic.classList.toggle('selected', hit);
+      });
+      window.__marqueeJustUsed = true;
+      setTimeout(() => { window.__marqueeJustUsed = false; }, 0);
+    }
+    mqEl.style.display = 'none';
+    mq = null;
+  }
+  desktop.addEventListener('mousedown', startMarquee);
+  window.addEventListener('mousemove', moveMarquee);
+  window.addEventListener('mouseup', endMarquee);
 })();
