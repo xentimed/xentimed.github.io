@@ -206,22 +206,28 @@ windows.forEach(win => {
 
   const titlebar = win.querySelector('.window-titlebar');
   let ox, oy, dragging = false;
-  titlebar.addEventListener('mousedown', e => {
+  titlebar.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch' && win.classList.contains('maximized')) return; // touch: ignore drag on fullscreen sheet
     if (e.target.closest('.window-controls')) return;
-    if (win.classList.contains('maximized')) return;
+    if (win.classList.contains('maximized') && e.pointerType !== 'touch') return;
     dragging = true;
     ox = e.clientX - win.offsetLeft;
     oy = e.clientY - win.offsetTop;
-    e.preventDefault();
+    if (e.pointerType !== 'mouse') {
+      titlebar.setPointerCapture?.(e.pointerId);
+    }
+    if (e.pointerType !== 'mouse') {
+      e.preventDefault();
+    }
   });
-  document.addEventListener('mousemove', e => {
+  document.addEventListener('pointermove', e => {
     if (!dragging) return;
     const x = Math.max(-win.offsetWidth + 80, Math.min(e.clientX - ox, window.innerWidth - 40));
     const y = Math.max(0, Math.min(e.clientY - oy, window.innerHeight - 34));
     win.style.left = x + 'px';
     win.style.top = y + 'px';
   });
-  document.addEventListener('mouseup', () => { dragging = false; });
+  document.addEventListener('pointerup', () => { dragging = false; });
 });
 
 /* ============================================================
@@ -523,6 +529,101 @@ function inline(s) {
 }
 
 /* ============================================================
+   Context menu (declared early so icon + titlebar wiring can use it)
+   ============================================================ */
+const ctxMenu = document.getElementById('ctx-menu');
+function closeCtx() {
+  if (!ctxMenu) return;
+  ctxMenu.hidden = true;
+  ctxMenu.innerHTML = '';
+}
+function openCtx(x, y, items) {
+  if (!ctxMenu) return;
+  ctxMenu.innerHTML = '';
+  items.forEach(it => {
+    if (it.sep) {
+      const d = document.createElement('div');
+      d.className = 'ctx-sep';
+      ctxMenu.appendChild(d);
+    } else {
+      const b = document.createElement('button');
+      b.className = 'ctx-item' + (it.head ? ' ctx-head' : '') + (it.disabled ? ' ctx-disabled' : '');
+      b.textContent = it.label;
+      b.disabled = !!it.disabled;
+      if (!it.disabled) {
+        b.addEventListener('click', () => { closeCtx(); it.action && it.action(); });
+      }
+      ctxMenu.appendChild(b);
+    }
+  });
+  ctxMenu.hidden = false;
+  // keep on-screen
+  const r = ctxMenu.getBoundingClientRect();
+  ctxMenu.style.left = Math.max(2, Math.min(x, window.innerWidth - r.width - 4)) + 'px';
+  ctxMenu.style.top  = Math.max(2, Math.min(y, window.innerHeight - r.height - 4)) + 'px';
+}
+document.addEventListener('mousedown', e => {
+  if (!ctxMenu.hidden && !ctxMenu.contains(e.target)) closeCtx();
+});
+document.addEventListener('pointerdown', e => {
+  // Only close on pointerdown if the user tapped OUTSIDE the menu.
+  // Items inside the menu are `click`-activated and never trigger pointerdown-close
+  // for the same target (this `!contains` check).
+  if (!ctxMenu.hidden && !ctxMenu.contains(e.target)) closeCtx();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCtx(); });
+window.addEventListener('blur', closeCtx);
+document.addEventListener('scroll', closeCtx, true);
+
+/* ============================================================
+   Touch / pointer detection
+   ============================================================ */
+const isTouch = matchMedia('(hover: none)').matches || ('ontouchstart' in window);
+let __pointerStart = null;
+let __longPressTimer = 0;
+let __longPressFired = false;
+
+function clearLongPress() {
+  if (__longPressTimer) { clearTimeout(__longPressTimer); __longPressTimer = 0; }
+  __longPressFired = false;
+}
+function fireLongPress(x, y) {
+  __longPressFired = true;
+  const el = document.elementFromPoint(x, y);
+  if (!el) return;
+  const icon = el.closest('.desktop-icon');
+  if (icon) {
+    document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+    icon.classList.add('selected');
+    const name = icon.dataset.name;
+    openCtx(x, y, [
+      { head: true, label: name },
+      { sep: true },
+      { label: 'Open', action: () => openEntry([name]) },
+      { label: 'Cut', disabled: true },
+      { label: 'Copy', disabled: true },
+      { label: 'Delete', disabled: true }
+    ]);
+    return;
+  }
+  const tb = el.closest('.window-titlebar');
+  if (tb && !el.closest('.window-controls') && !el.closest('.win-ico')) {
+    const win = tb.closest('.window');
+    if (win) {
+      const maxed = win.classList.contains('maximized');
+      openCtx(x, y, [
+        { head: true, label: win.dataset.title || win.id },
+        { sep: true },
+        { label: maxed ? 'Restore' : 'Maximize', action: () => toggleMaximize(win) },
+        { label: 'Minimize', action: () => minimizeWindow(win) },
+        { sep: true },
+        { label: 'Close', action: () => closeWindow(win) }
+      ]);
+    }
+  }
+}
+
+/* ============================================================
    Desktop icons (rendered from FS root)
    ============================================================ */
 const iconArea = document.getElementById('icon-area');
@@ -537,10 +638,47 @@ function renderDesktopIcons() {
     icon.innerHTML = `<div class="icon-img">${ICONS[node.type]}</div><div class="icon-label">${node.name}</div>`;
     icon.title = node.name;
 
-    icon.addEventListener('click', () => {
-      document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
-      icon.classList.add('selected');
+    // Pointer-down: kick off a potential long-press (touch only)
+    icon.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse') return;
+      __longPressFired = false;
+      __pointerStart = { x: e.clientX, y: e.clientY, t: Date.now(), target: icon };
+      clearLongPress();
+      __longPressTimer = setTimeout(() => fireLongPress(e.clientX, e.clientY), 500);
     });
+    icon.addEventListener('pointermove', e => {
+      if (!__pointerStart || __pointerStart.target !== icon) return;
+      const dx = e.clientX - __pointerStart.x, dy = e.clientY - __pointerStart.y;
+      if (Math.hypot(dx, dy) > 8) clearLongPress();
+    });
+    icon.addEventListener('pointerup', e => {
+      if (e.pointerType === 'mouse') return;
+      clearLongPress();
+      if (__longPressFired) return;
+      const dt = Date.now() - (__pointerStart?.t || 0);
+      const dx = e.clientX - (__pointerStart?.x || 0);
+      const dy = e.clientY - (__pointerStart?.y || 0);
+      __pointerStart = null;
+      if (Math.hypot(dx, dy) > 8) return; // it was a swipe, not a tap
+      // On touch: single tap = open the context menu (per user choice)
+      if (isTouch) {
+        document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+        icon.classList.add('selected');
+        const name = icon.dataset.name;
+        openCtx(e.clientX, e.clientY, [
+          { head: true, label: name },
+          { sep: true },
+          { label: 'Open', action: () => openEntry([name]) },
+          { label: 'Cut', disabled: true },
+          { label: 'Copy', disabled: true },
+          { label: 'Delete', disabled: true }
+        ]);
+      } else {
+        document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+        icon.classList.add('selected');
+      }
+    });
+    icon.addEventListener('pointercancel', clearLongPress);
     icon.addEventListener('contextmenu', e => e.preventDefault());
     icon.addEventListener('dblclick', () => openEntry([node.name]));
     iconArea.appendChild(icon);
@@ -988,46 +1126,12 @@ document.querySelectorAll('.gadget-close').forEach(btn => {
   const desktop = document.getElementById('desktop');
   const iconArea = document.getElementById('icon-area');
   const displayWin = document.getElementById('window-display');
-  const ctxMenu = document.getElementById('ctx-menu');
   const winGlyphs = { explorer: '📁', notepad: '📄', browser: '🌐', console: '🖥️', display: '🎨' };
 
-  /* ---------- context menu engine ---------- */
-  function closeCtx() {
-    ctxMenu.hidden = true;
-    ctxMenu.innerHTML = '';
-  }
-  function openCtx(x, y, items) {
-    ctxMenu.innerHTML = '';
-    items.forEach(it => {
-      if (it.sep) {
-        const d = document.createElement('div');
-        d.className = 'ctx-sep';
-        ctxMenu.appendChild(d);
-      } else {
-        const b = document.createElement('button');
-        b.className = 'ctx-item' + (it.head ? ' ctx-head' : '') + (it.disabled ? ' ctx-disabled' : '');
-        b.textContent = it.label;
-        b.disabled = !!it.disabled;
-        if (!it.disabled) {
-          b.addEventListener('click', () => { closeCtx(); it.action && it.action(); });
-        }
-        ctxMenu.appendChild(b);
-      }
-    });
-    ctxMenu.hidden = false;
-    // keep on-screen
-    const r = ctxMenu.getBoundingClientRect();
-    ctxMenu.style.left = Math.max(2, Math.min(x, window.innerWidth - r.width - 4)) + 'px';
-    ctxMenu.style.top  = Math.max(2, Math.min(y, window.innerHeight - r.height - 4)) + 'px';
-  }
-  document.addEventListener('mousedown', e => {
-    if (!ctxMenu.hidden && !ctxMenu.contains(e.target)) closeCtx();
-  });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCtx(); });
-  window.addEventListener('blur', closeCtx);
-  document.addEventListener('scroll', closeCtx, true);
+  /* ---------- titlebar icons + system menus ----------
+     openCtx / closeCtx are defined earlier (module scope) so touch + icon
+     handlers can call them too. */
 
-  /* ---------- titlebar icons + system menus ---------- */
   function systemMenuFor(win, x, y) {
     const maxed = win.classList.contains('maximized');
     openCtx(x, y, [

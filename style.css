@@ -855,3 +855,102 @@ body, html {
   border-bottom-color: #fff;
   background: #a0a0a0;
 }
+
+/* ============================================================
+   Responsive — tablet, phone
+   ============================================================ */
+
+/* Tablet (portrait) — narrower gadgets, room for icons */
+@media (max-width: 1024px) {
+  #gadgets { width: 240px; }
+  #icon-area { width: calc(100% - 260px); }
+}
+
+/* Phone — gadgets drop to a bottom tray; icons fill the top */
+@media (max-width: 600px) {
+  #icon-area {
+    width: 100%;
+    height: calc(100% - 220px);   /* leave room for the gadget strip + taskbar */
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    padding: 10px;
+    gap: 8px;
+  }
+  .desktop-icon { width: calc(33.333% - 8px); min-width: 0; padding: 4px 2px; }
+  .desktop-icon .icon-img { font-size: 30px; }
+  .desktop-icon .icon-label { font-size: 10px; }
+
+  #gadgets {
+    position: absolute;
+    top: auto;
+    bottom: 36px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 184px;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    padding: 10px;
+  }
+  .gadget {
+    scroll-snap-align: start;
+    flex: 0 0 160px;
+    min-width: 160px;
+  }
+  .gadget[data-gadget="puzzle"],
+  .gadget[data-gadget="clock"] { width: 160px; }
+  .gadget[data-gadget="notes"] { width: 200px; }
+
+  /* Taskbar grows for fingers */
+  #taskbar { height: 36px; font-size: 14px; }
+  #start-btn { padding: 5px 12px; }
+  #clock { font-size: 13px; padding: 4px 10px; min-width: 70px; }
+
+  /* Windows behave as full-screen sheets by default */
+  .window {
+    width: calc(100vw - 8px) !important;
+    height: calc(100vh - 44px) !important;
+    top: 4px !important;
+    left: 4px !important;
+    min-width: 0;
+    min-height: 0;
+    resize: none;
+    border-radius: 0;
+  }
+  .window.maximized { border-radius: 0; }
+  .window-titlebar { padding: 6px 4px 6px 8px; font-size: 14px; }
+  .window-controls button { width: 30px; height: 24px; font-size: 13px; }
+  .win-ico { width: 22px; height: 22px; font-size: 14px; }
+
+  /* Context menu: larger items for touch */
+  #ctx-menu { min-width: 200px; font-size: 14px; }
+  .ctx-item { padding: 10px 24px 10px 12px; }
+
+  /* Start menu: anchor full-width and grow it */
+  #start-menu { width: calc(100vw - 8px); left: 4px; }
+  .start-item { padding: 10px 10px; font-size: 14px; }
+
+  /* Clock flyout: a real sheet on phone */
+  #clock-popup { right: 4px; bottom: 40px; width: calc(100vw - 8px); }
+}
+
+/* Phones in landscape: gadgets right sidebar, narrower */
+@media (max-width: 900px) and (orientation: landscape) {
+  #gadgets { width: 220px; height: calc(100% - 36px); }
+  #icon-area { width: calc(100% - 240px); height: calc(100% - 36px); }
+  .window { width: calc(100vw - 240px) !important; height: calc(100vh - 40px) !important; }
+}
+
+/* Touch: kill hover-only effects, show tap feedback */
+@media (hover: none) {
+  .desktop-icon:active { background: rgba(0,0,0,0.30); }
+  .start-item:active { background: #000080; color: #fff; }
+  .taskbar-window:active { background: #a0a0a0; }
+}
+
+/* Prevent text selection / zoom on tap for the shell */
+html, body { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+#terminal-input, #notes-area, #browser-address, .window-content pre { -webkit-user-select: text; user-select: text; }
