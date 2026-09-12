@@ -2,189 +2,138 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>runyoussef.me</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Youssef Tamyachte · Portfolio</title>
+<meta name="description" content="Youssef Tamyachte — cybersecurity student focused on offensive security, Linux and networking. Projects, skills and how to reach me.">
+<link rel="icon" href="./assets/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-  <div id="desktop">
+<!-- ============ particles background ============ -->
+<div class="particle" style="position:fixed;inset:0;z-index:0;pointer-events:none;"><canvas id="particles-js"></canvas></div>
 
-    <!-- Desktop icons (rendered from virtual FS in script.js) -->
-    <div id="icon-area"></div>
-
-    <!-- File Explorer -->
-    <div class="window" id="window-explorer" data-title="File Explorer">
-      <div class="window-titlebar">
-        <span>File Explorer</span>
-        <span class="window-controls">
-          <button class="btn-min" title="Minimize">─</button>
-          <button class="btn-max" title="Maximize">□</button>
-          <button class="btn-close" title="Close">✕</button>
-        </span>
-      </div>
-      <div class="explorer-toolbar">
-        <button id="btn-back" title="Back">←</button>
-        <button id="btn-up" title="Up one level">↑</button>
-        <div id="addr-bar">C:\</div>
-      </div>
-      <div class="window-content explorer-body">
-        <div id="explorer-list"></div>
-      </div>
-    </div>
-
-    <!-- Notepad reader -->
-    <div class="window" id="window-notepad" data-title="Notepad">
-      <div class="window-titlebar">
-        <span id="notepad-title">Untitled.txt</span>
-        <span class="window-controls">
-          <button class="btn-min" title="Minimize">─</button>
-          <button class="btn-max" title="Maximize">□</button>
-          <button class="btn-close" title="Close">✕</button>
-        </span>
-      </div>
-      <div class="window-content notepad-body">
-        <pre id="notepad-content"></pre>
-      </div>
-    </div>
-
-    <!-- Web browser mirror -->
-    <div class="window" id="window-browser" data-title="Browser">
-      <div class="window-titlebar">
-        <span>Browser</span>
-        <span class="window-controls">
-          <button class="btn-min" title="Minimize">─</button>
-          <button class="btn-max" title="Maximize">□</button>
-          <button class="btn-close" title="Close">✕</button>
-        </span>
-      </div>
-      <div class="browser-chrome">
-        <button id="browser-back" title="Back">←</button>
-        <button id="browser-forward" title="Forward">→</button>
-        <button id="browser-refresh" title="Refresh">⟳</button>
-        <input type="text" id="browser-address" spellcheck="false" autocomplete="off">
-        <button id="browser-go" title="Open">Go</button>
-      </div>
-      <div id="browser-body"></div>
-    </div>
-
-    <!-- Terminal -->
-    <div class="window" id="window-terminal" data-title="console">
-      <div class="window-titlebar">
-        <span>console</span>
-        <span class="window-controls">
-          <button class="btn-min" title="Minimize">─</button>
-          <button class="btn-max" title="Maximize">□</button>
-          <button class="btn-close" title="Close">✕</button>
-        </span>
-      </div>
-      <div class="window-content terminal-body">
-        <div id="terminal-output"></div>
-        <div class="terminal-input-line">
-          <span class="prompt"><span class="c-user">user</span><span class="c-host">@run</span><span class="c-path">:~</span><span class="c-dollar">$</span>&nbsp;</span>
-          <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
-        </div>
-      </div>
-    </div>
-
-    <!-- Windows 7 style gadgets -->
-    <div id="gadgets">
-      <div class="gadget" data-gadget="puzzle">
-        <div class="gadget-title">
-          <span>Puzzle</span>
-          <button class="gadget-close" title="Close gadget">✕</button>
-        </div>
-        <div class="gadget-body">
-          <div id="puzzle-grid"></div>
-          <div class="puzzle-status">
-            <span id="puzzle-moves">moves: 0</span>
-            <span id="puzzle-state"></span>
-          </div>
-          <button id="puzzle-shuffle">Shuffle</button>
-        </div>
-      </div>
-
-      <div class="gadget" data-gadget="clock">
-        <div class="gadget-title">
-          <span>Clock</span>
-          <button class="gadget-close" title="Close gadget">✕</button>
-        </div>
-        <div class="gadget-body">
-          <svg id="analog" viewBox="0 0 100 100" width="130" height="130">
-            <circle cx="50" cy="50" r="46" class="a-face"/>
-            <g id="a-ticks"></g>
-            <line id="a-hour"  x1="50" y1="50" x2="50" y2="28"/>
-            <line id="a-minute" x1="50" y1="50" x2="50" y2="18"/>
-            <line id="a-second" x1="50" y1="54" x2="50" y2="14"/>
-            <circle cx="50" cy="50" r="2" class="a-pin"/>
-          </svg>
-          <div id="analog-digital"></div>
-        </div>
-      </div>
-
-      <div class="gadget" data-gadget="notes">
-        <div class="gadget-title">
-          <span>Notes</span>
-          <button class="gadget-close" title="Close gadget">✕</button>
-        </div>
-        <div class="gadget-body">
-          <div class="notes-greeter">✉ Welcome to my portfolio!</div>
-          <textarea id="notes-area" placeholder="jot something down…"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- Taskbar -->
-    <div id="taskbar">
-      <div id="start-btn"><span class="start-flag" aria-hidden="true"></span>Start</div>
-      <div id="taskbar-windows"></div>
-      <div id="clock"></div>
-    </div>
-
-    <!-- Right-click context menu -->
-    <div id="ctx-menu" hidden></div>
-
-    <!-- Clock flyout -->
-    <div id="clock-popup" hidden>
-      <div id="clock-popup-time"></div>
-      <div id="clock-popup-date"></div>
-      <div id="clock-popup-cal-head">
-        <button id="clock-cal-prev" title="Previous month">◀</button>
-        <span id="clock-cal-label"></span>
-        <button id="clock-cal-next" title="Next month">▶</button>
-      </div>
-      <div id="clock-cal-grid"></div>
-    </div>
-
-    <!-- Start menu -->
-    <div id="start-menu">
-      <div id="start-sidebar"><span>youssef</span></div>
-      <div id="start-items"></div>
-    </div>
-
-    <!-- Display Properties (right-click desktop → Properties) -->
-    <div class="window" id="window-display" data-title="Display Properties">
-      <div class="window-titlebar">
-        <span>Display Properties</span>
-        <span class="window-controls">
-          <button class="btn-close" title="Close">✕</button>
-        </span>
-      </div>
-      <div class="window-content">
-        <div class="props-tab">Desktop</div>
-        <div class="props-group">
-          <label class="props-label">Wallpaper</label>
-          <div class="wall-grid" id="wall-grid"></div>
-        </div>
-        <div class="props-actions">
-          <button class="btn-retro" id="props-ok">OK</button>
-          <button class="btn-retro" id="props-cancel">Cancel</button>
-        </div>
-      </div>
-    </div>
-
+<!-- ============ full-screen header ============ -->
+<div class="Header">
+  <h1 id="hero-name">I&#8217;m Youssef</h1>
+  <p class="line-1 anim-typewriter">and this is my portfolio... </p>
+  <!-- ============ theme switch ============ -->
+  <div class="theme-toggle">
+    <label class="switch" title="Toggle light / dark theme">
+      <input id="mode-switch" type="checkbox" aria-label="Toggle dark mode">
+      <span class="slider round"></span>
+    </label>
   </div>
+  <div class="see-wrap">
+    <a href="#about"><button class="see" type="button">Checkout Portfolio<i class="fas fa-eye"></i></button></a>
+  </div>
+</div>
 
-<script src="script.js"></script>
+<!-- fixed contact me image (removed) -->
+
+<!-- ============ about ============ -->
+<div id="about" class="effect2">
+  <div class="row g-0" data-aos="zoom-in-up" data-aos-once="true">
+    <div class="col-12 d-none d-md-block offset-md-1 col-md-4 Photo" id="not-dark2"></div>
+    <div class="col-12 offset-md-1 col-md-6 about">
+      <div class="About-title-box"><h1 id="About" class="red-line">About Me</h1></div>
+      <p class="lead about-text">I'm Youssef Tamyachte, a cybersecurity student in Morocco. I care about privacy and how things break, not how they're advertised. Most of what I know came from side projects that started with "how hard could this be" and ended with me three hours inside someone's source code. This site is a home base for that work: the projects I build, the rabbit holes I fall down, and what I'm still trying to figure out.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ skills checklist ============ -->
+<div class="third skills-sec" id="skills-sec" data-aos="zoom-in-up" data-aos-once="true">
+  <div class="pp-head-line mx-auto text-center"><h1 class="red-line pp-head">Skills</h1></div>
+  <div class="row d-flex justify-content-center skills">
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fab fa-python"></i><h6>Python</h6></div>
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fab fa-js"></i><h6>JavaScript</h6></div>
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fas fa-terminal"></i><h6>Bash / Shell</h6></div>
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fas fa-server"></i><h6>Docker</h6></div>
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fab fa-git"></i><h6>Git</h6></div>
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fas fa-code"></i><h6>Linux / Arch</h6></div>
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fas fa-network-wired"></i><h6>Networking</h6></div>
+    <div class="skill__square col-3 col-sm-2 my-3" data-aos="fade-up" style="text-align:center"><i class="fas fa-lock"></i><h6>Privacy</h6></div>
+  </div>
+</div>
+
+<!-- ============ selected work: projects ============ -->
+<div class="third" data-aos="zoom-in-up" data-aos-once="true">
+  <div class="pp-head-line mx-auto text-center"><h1 id="Projects" class="red-line pp-head">Selected Work</h1></div>
+  <div class="row g-4">
+    <div class="col-12 col-lg-4 project-card" data-aos="fade-up">
+      <a title="musiorg on GitHub" class="project-name" target="_blank" rel="noopener" href="https://github.com/xentimed/musiorg"><h2>musiorg</h2></a>
+      <h3>Terminal music organizer that sorts your library by genre. python · textual · mutagen</h3>
+    </div>
+    <div class="col-12 col-lg-4 project-card" data-aos="fade-up">
+      <a title="openpod on GitHub" class="project-name" target="_blank" rel="noopener" href="https://github.com/xentimed/openpod"><h2>openpod</h2></a>
+      <h3>Turns a spare Android phone into a private, offline iPod. android · lineageos · flutter</h3>
+    </div>
+    <div class="col-12 col-lg-4 project-card" data-aos="fade-up">
+      <a title="runyoussef.me" class="project-name" target="_blank" rel="noopener" href="https://runyoussef.me"><h2>this portfolio</h2></a>
+      <h3>The site you're reading, rebuilt whenever it stops representing me. html · css · js</h3>
+    </div>
+  </div>
+</div>
+
+<!-- ============ miscellaneous ============ -->
+<div class="third" data-aos="zoom-in-up" data-aos-once="true">
+  <div class="pp-head-line mx-auto text-center"><h1 class="red-line pp-head">Miscellaneous</h1></div>
+  <div class="row g-4">
+    <div class="col-12 col-lg-4 project-card" data-aos="fade-up">
+      <a title="GitHub" class="project-name" target="_blank" rel="noopener" href="https://github.com/xentimed"><h2>Open Source</h2></a>
+      <h3>Issues, PRs and fixes for Linux and security tooling. GitHub · Codeberg</h3>
+    </div>
+    <div class="col-12 col-lg-4 project-card" data-aos="fade-up">
+      <a title="Arch Linux" class="project-name" target="_blank" rel="noopener" href="https://www.archlinux.org/"><h2>Arch Linux</h2></a>
+      <h3>Hyprland, kitty, dotfiles. Linux I actually own.</h3>
+    </div>
+    <div class="col-12 col-lg-4 project-card" data-aos="fade-up">
+      <a title="YouTube" class="project-name" target="_blank" rel="noopener" href="https://youtube.com/@xentimed"><h2>YouTube</h2></a>
+      <h3>@xentimed, deadpan takes on Linux, privacy and cybersecurity.</h3>
+    </div>
+  </div>
+</div>
+
+<!-- ============ contact ============ -->
+<div class="parallax">
+  <div class="git-form" data-aos="zoom-in-up" data-aos-once="true">
+    <div class="git-head-div text-center mx-auto"><h1 id="Contact" class="git-head">Get in Touch</h1></div>
+    <div class="container">
+      <div class="row git-cont">
+        <div class="col-12 col-sm-6 half">
+          <form action="https://formspree.io" method="GET" target="_blank" rel="noopener">
+            <input type="text" id="fname" name="firstname" placeholder="Your name" required>
+            <input type="email" id="mailid" name="Email" placeholder="Email Address" required>
+            <input type="text" id="sub" name="Subject" placeholder="Subject" required>
+            <textarea id="msg" name="message" placeholder="Message" required></textarea>
+            <button type="submit">Send Message</button>
+          </form>
+        </div>
+        <div class="col-12 col-sm-6 half">
+          <p class="lead">Got a project in mind, or just want to say hi? Fill the form, or find me on GitHub, Codeberg and YouTube. Email works too.</p>
+          <p class="mailto"><i class="fas fa-envelope" aria-hidden="true"></i> <a href="mailto:yousseftamy7@proton.me">yousseftamy7@proton.me</a></p>
+          <div class="d-flex justify-content-center flex-column mt-4">
+            <div class="inline-block text-center py-4">
+              <a title="GitHub" target="_blank" rel="noopener" href="https://github.com/xentimed"><i class="fab fa-github"></i></a>
+              <a title="Codeberg" target="_blank" rel="noopener" href="https://codeberg.org/noobman"><i class="fab fa-gitlab"></i></a>
+              <a title="YouTube" target="_blank" rel="noopener" href="https://youtube.com/@xentimed"><i class="fab fa-youtube"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="Copy">&copy; <span id="year">2026</span> Youssef Tamyachte — All Rights Reserved</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="./script.js"></script>
 </body>
 </html>
